@@ -10,22 +10,21 @@ from django.contrib.auth import authenticate, login
 from rest_framework_jwt.settings import api_settings
 import jwt
 
-
 @api_view(['GET'])
 def apiOverview(request):
 	api_urls = {
-		'List':'/task-list/',
-		'Detail View':'/task-detail/',
-		'Create':'/task-create/',
-		'Update':'/task-update/',
-		'Delete':'/task-delete/',
+		'List':'/tasks/',
+		'Detail View':'/tasks/<str:pk>/',
+		'Create':'task/new',
+		'Update':'/task/<str:pk>/update',
+		'Delete':'task/<str:pk>/delete',
 		}
 
 	return Response(api_urls)
 
 @api_view(['GET'])
 def taskList(request):
-	tasks = Task.objects.all().order_by('-id')
+	tasks = Task.objects.all().order_by('completed')
 	serializer = TaskSerializer(tasks, many=True)
 	return Response(serializer.data)
 
@@ -36,7 +35,7 @@ def taskDetail(request, pk):
 	return Response(serializer.data)
 
 
-@api_view(['POST'])
+@api_view(['POST',"OPTIONS"] )
 def taskCreate(request):
 	serializer = TaskSerializer(data=request.data)
 
@@ -47,9 +46,10 @@ def taskCreate(request):
 
 @api_view(['POST'])
 def taskUpdate(request, pk):
+	print("asas")
 	task = Task.objects.get(id=pk)
 	serializer = TaskSerializer(instance=task, data=request.data)
-
+	
 	if serializer.is_valid():
 		serializer.save()
 

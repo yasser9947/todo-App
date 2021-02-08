@@ -9,20 +9,24 @@ import axios from 'axios'
 function App() {
   const [tasks, setTasks] = useState([])
   const [title, setTitle] = useState('')
+  const[change , setChane] = useState(true)
   useEffect(() => {
     // effect
     axios.get('/api/tasks')
       .then(data => {
         console.log(data)
-        setTasks(data.data)
+        setTasks(data.data.filter(ele => typeof(ele.id)== "number" ))
       })
-  }, [])
+  }, [change])
 
   const addTask = (e) => {
     e.preventDefault()
-    axios.post('http://127.0.0.1:8000/api/tasks/new', { title: title, completed: false })
-      .then(data => console.log(data))
-      .catch(err => console.log(err))
+
+    axios.post('http://127.0.0.1:8000/api/task/new', JSON.stringify({ title: title, completed: false }) , { headers: {
+      "Content-type": "application/json"
+    }})
+      .then(data => setChane(pre => !pre))
+      .catch(err => console.log("arr",err))
   }
   console.log(title)
   return (
@@ -40,7 +44,7 @@ function App() {
           </Col>
         </Row>
 
-        {tasks.map(ele => <Task title={ele.title} />)}
+        {tasks.map(ele => <Task setChane={setChane} {...ele} />)}
         <Task />
 
       </Container>
